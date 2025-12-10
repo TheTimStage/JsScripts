@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "jsscripts",
+  "version": "BETA-1.0+1.21.8",
+  "name": "JsScripts",
+  "description": "Adds JavaScript scripts directly on the server!",
+  "authors": [
+    "TheTimStage"
+  ],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/jsscripts/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "org.tts.jsscripts.JsScripts"
+    ],
+    "client": [
+      "org.tts.jsscripts.JsScriptsClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.17.2",
+    "minecraft": "~1.21.8",
+    "java": ">=21",
+    "fabric-api": "*",
+    "mixinextras": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

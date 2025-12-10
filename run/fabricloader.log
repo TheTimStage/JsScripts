@@ -1,0 +1,25 @@
+[13:18:00] [ERROR] [FabricLoader/]: Uncaught exception in thread "main"
+net.fabricmc.loader.impl.util.ExceptionUtil$WrappedException: java.io.IOException: error reading C:\Users\user\.gradle\caches\modules-2\files-2.1\org.graalvm.js\js\24.1.0\5c317dd6b2e2d64d03d4be915188b9dac8e1a95f\js-24.1.0.pom
+	at net.fabricmc.loader.impl.util.ExceptionUtil.wrap(ExceptionUtil.java:51)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.locateGame(MinecraftGameProvider.java:260)
+	at net.fabricmc.loader.impl.launch.knot.Knot.createGameProvider(Knot.java:171)
+	at net.fabricmc.loader.impl.launch.knot.Knot.init(Knot.java:128)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:66)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86)
+Caused by: java.io.IOException: error reading C:\Users\user\.gradle\caches\modules-2\files-2.1\org.graalvm.js\js\24.1.0\5c317dd6b2e2d64d03d4be915188b9dac8e1a95f\js-24.1.0.pom
+	at net.fabricmc.loader.impl.game.LibClassifier.process(LibClassifier.java:215)
+	at net.fabricmc.loader.impl.game.LibClassifier.process(LibClassifier.java:162)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.locateGame(MinecraftGameProvider.java:209)
+	... 5 more
+Caused by: java.util.zip.ZipException: zip END header not found
+	at java.base/java.util.zip.ZipFile$Source.findEND(ZipFile.java:1649)
+	at java.base/java.util.zip.ZipFile$Source.initCEN(ZipFile.java:1657)
+	at java.base/java.util.zip.ZipFile$Source.<init>(ZipFile.java:1495)
+	at java.base/java.util.zip.ZipFile$Source.get(ZipFile.java:1458)
+	at java.base/java.util.zip.ZipFile$CleanableResource.<init>(ZipFile.java:724)
+	at java.base/java.util.zip.ZipFile.<init>(ZipFile.java:251)
+	at java.base/java.util.zip.ZipFile.<init>(ZipFile.java:180)
+	at java.base/java.util.zip.ZipFile.<init>(ZipFile.java:194)
+	at net.fabricmc.loader.impl.game.LibClassifier.process(LibClassifier.java:202)
+	... 7 more

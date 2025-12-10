@@ -1,0 +1,4 @@
+/jss
+/jsscripts
+/jsscripts edit
+/tp 0 100 0
