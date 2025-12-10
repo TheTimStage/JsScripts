@@ -14,48 +14,18 @@ import org.mozilla.javascript.*;
 
 import java.util.*;
 
-/**
- * Движок JS-скриптов для лорных ивентов.
- *
- * Имеет:
- *  - scriptType("once" | "loop")
- *  - on(event, fn), onLoop(fn)
- *  - wait/delay, repeat, every
- *  - log(...)
- *  - msg/sendMessage, actionbar, title, subtitle, fullTitle
- *  - tp, give
- *  - playSound(player,...), playSoundAt(world,...)
- *  - World.overworld()/nether()/end(), World.setBlock, World.particle
- *  - runCommand, runCommandAs
- */
 public final class ScriptEngine {
-
-    // ---------------- CORE STATE ----------------
-
     private static final Map<String, Scriptable> contexts = new HashMap<>();
     private static final Map<String, Script> compiled = new HashMap<>();
     private static Scriptable baseScope;
-
-    // event → js handlers: on("event", fn)
     private static final Map<String, List<Function>> eventHandlers = new HashMap<>();
-
-    // script types: once / loop
     private static final Map<String, String> scriptTypes = new HashMap<>();
-
-    // loop handlers: onLoop(fn) — только для loop-скриптов
     private static final Map<String, Function> loopHandlers = new HashMap<>();
-
-    // scheduler (wait / delay / repeat / every)
     private record Task(String scriptName, int delay, Runnable callback) {}
     private static final List<Task> scheduledTasks = new ArrayList<>();
-
-    // server нужен для World.*, команд, звуков и т.д.
     private static MinecraftServer server;
 
 
-    // =====================================================================
-    // INIT ENGINE + GLOBAL API
-    // =====================================================================
     public static void init(MinecraftServer srv) {
         server = srv;
 
@@ -73,12 +43,9 @@ public final class ScriptEngine {
         System.out.println("[JsScripts] ScriptEngine initialized with extended API.");
     }
 
-    // ---------------------------------------------------------------------
-    // CORE JS API (log, scriptType, on, onLoop, wait/delay, repeat, every)
-    // ---------------------------------------------------------------------
     private static void registerCoreAPI() {
 
-        // ---------------- log(msg) ----------------
+        // log(msg)
         ScriptableObject.putProperty(baseScope, "log", new BaseFunction() {
             @Override public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
                 if (args.length > 0) {
@@ -88,7 +55,7 @@ public final class ScriptEngine {
             }
         });
 
-        // ---------------- scriptType("once" | "loop") ----------------
+        // scriptType("once" | "loop")
         ScriptableObject.putProperty(baseScope, "scriptType", new BaseFunction() {
             @Override public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
 
@@ -105,7 +72,7 @@ public final class ScriptEngine {
             }
         });
 
-        // ---------------- on(event, fn) ----------------
+        // on(event, fn)
         ScriptableObject.putProperty(baseScope, "on", new BaseFunction() {
             @Override public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
 
@@ -117,7 +84,7 @@ public final class ScriptEngine {
             }
         });
 
-        // ---------------- onLoop(fn) ----------------
+        // onLoop(fn)
         ScriptableObject.putProperty(baseScope, "onLoop", new BaseFunction() {
             @Override public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
 
@@ -130,7 +97,7 @@ public final class ScriptEngine {
             }
         });
 
-        // ---------------- wait(ticks, callback) ----------------
+        // wait(ticks, callback)
         BaseFunction waitFn = new BaseFunction() {
             @Override public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
                 if (args.length < 2) return null;
@@ -153,7 +120,7 @@ public final class ScriptEngine {
         // delay(ticks, fn) → алиас wait(...)
         ScriptableObject.putProperty(baseScope, "delay", waitFn);
 
-        // ---------------- repeat(count, callback(index)) ----------------
+        // repeat(count, callback(index))
         ScriptableObject.putProperty(baseScope, "repeat", new BaseFunction() {
             @Override public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
 
@@ -177,8 +144,7 @@ public final class ScriptEngine {
             }
         });
 
-        // ---------------- every(ticks, fn) ----------------
-        // реализуется через самоперепланирующуюся задачу в scheduler
+        // every(ticks, fn)
         ScriptableObject.putProperty(baseScope, "every", new BaseFunction() {
             @Override public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
                 if (args.length < 2) return null;
@@ -207,10 +173,6 @@ public final class ScriptEngine {
         });
     }
 
-
-    // =====================================================================
-    // WORLD API (World.overworld(), setBlock, particle, playSoundAt)
-    // =====================================================================
     private static void registerWorldAPI() {
 
         Context cx = Context.getCurrentContext();
@@ -329,10 +291,6 @@ public final class ScriptEngine {
         });
     }
 
-
-    // =====================================================================
-    // PLAYER / HUD / SOUND API
-    // =====================================================================
     private static void registerPlayerAndHudAPI() {
         // sendMessage(player, text)
         ScriptableObject.putProperty(baseScope, "sendMessage", new BaseFunction() {
@@ -531,9 +489,6 @@ public final class ScriptEngine {
     }
 
 
-    // =====================================================================
-    // COMMAND API
-    // =====================================================================
     private static void registerCommandAPI() {
 
         // runCommand("say test")
@@ -564,13 +519,7 @@ public final class ScriptEngine {
         });
     }
 
-
-    // =====================================================================
-    // EMIT EVENT (вызывается из ScriptAPI)
-    // =====================================================================
     public static void emit(String event, Object... args) {
-
-        // 1) обычные обработчики
         List<Function> handlers = eventHandlers.get(event);
         if (handlers != null) {
             try (Context cx = Context.enter()) {
@@ -580,7 +529,6 @@ public final class ScriptEngine {
             }
         }
 
-        // 2) loop-обработчики (только для serverTick)
         if (event.equals("serverTick")) {
             try (Context cx = Context.enter()) {
                 for (var entry : loopHandlers.entrySet()) {
@@ -593,7 +541,6 @@ public final class ScriptEngine {
                 }
             }
 
-            // 3) scheduler (wait/delay/repeat/every) — тикаем ТОЛЬКО по serverTick
             processScheduler();
         }
     }
@@ -606,7 +553,6 @@ public final class ScriptEngine {
             int d = t.delay() - 1;
 
             if (d <= 0) {
-                // once-скрипты не выполняем дальше
                 if (!"once".equals(scriptTypes.get(t.scriptName()))) {
                     run.add(t);
                 }
@@ -627,10 +573,6 @@ public final class ScriptEngine {
         }
     }
 
-
-    // =====================================================================
-    // RUN SCRIPT (компиляция + exec)
-    // =====================================================================
     public static void run(String name, String code) {
         try (Context cx = Context.enter()) {
             cx.setLanguageVersion(Context.VERSION_ES6);
@@ -646,22 +588,18 @@ public final class ScriptEngine {
                 return sc;
             });
 
-            // выполнить скрипт
             script.exec(cx, scope);
 
-            // если тип once — сразу выкидываем всё
             if ("once".equals(scriptTypes.get(name))) {
 
                 compiled.remove(name);
                 contexts.remove(name);
                 loopHandlers.remove(name);
 
-                // удалить обработчики ивентов этого скрипта
                 for (List<Function> list : eventHandlers.values()) {
                     list.removeIf(fn -> Objects.equals(getScriptName(fn.getParentScope()), name));
                 }
 
-                // удалить задачи шедулера
                 scheduledTasks.removeIf(t -> t.scriptName().equals(name));
 
                 System.out.println("[JsScripts] Script '" + name + "' finished (once) and removed.");
@@ -673,9 +611,6 @@ public final class ScriptEngine {
     }
 
 
-    // =====================================================================
-    // HELPERS
-    // =====================================================================
     private static Scriptable resolveRootScope(Scriptable sc) {
         while (sc.getParentScope() != null)
             sc = sc.getParentScope();
@@ -688,7 +623,6 @@ public final class ScriptEngine {
         return (o instanceof String s) ? s : null;
     }
 
-    // безопасные конвертеры (исключают ClassCastException)
     private static int toInt(Object o) {
         if (o instanceof Number n) return n.intValue();
         if (o instanceof String s) {
