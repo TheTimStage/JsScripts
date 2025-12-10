@@ -26,9 +26,6 @@ public class JsSStorage {
 
     public record Entry(String path, boolean directory) {}
 
-    // ----------------------------------------------------------------------
-    // LIST DIRECTORY
-    // ----------------------------------------------------------------------
     public static List<Entry> list(String directory) {
         List<Entry> out = new ArrayList<>();
 
@@ -54,9 +51,6 @@ public class JsSStorage {
         return out;
     }
 
-    // ----------------------------------------------------------------------
-    // LOAD
-    // ----------------------------------------------------------------------
     public static String loadScript(String path) {
         if (path == null || path.isEmpty()) return "";
         Path file = ROOT.resolve(path).normalize().toAbsolutePath();
@@ -73,9 +67,6 @@ public class JsSStorage {
         return "";
     }
 
-    // ----------------------------------------------------------------------
-    // SAVE
-    // ----------------------------------------------------------------------
     public static void saveScript(String path, String code) {
         if (path == null || path.isEmpty()) return;
 
@@ -99,9 +90,6 @@ public class JsSStorage {
         }
     }
 
-    // ----------------------------------------------------------------------
-    // DELETE
-    // ----------------------------------------------------------------------
     public static void deleteEntry(String path, boolean directory) {
         if (path == null || path.isEmpty()) return;
 
