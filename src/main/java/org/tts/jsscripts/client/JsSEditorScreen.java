@@ -14,12 +14,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class JsSEditorScreen extends Screen {
-
-    // ---------------- CONFIG / CONSTANTS ----------------
-
-    private static final int GUTTER_WIDTH = 45;   // ширина области с номерами строк
-    private static final int BORDER_SIZE  = 2;    // толщина рамки
-    private static final int LINE_HEIGHT  = 14;   // высота строки текста
+    private static final int GUTTER_WIDTH = 45;
+    private static final int BORDER_SIZE  = 2;
+    private static final int LINE_HEIGHT  = 14;
 
     // JS ключевые слова
     private static final List<String> KEYWORDS = Arrays.asList(
@@ -28,21 +25,14 @@ public class JsSEditorScreen extends Screen {
             "throw","async","await","true","false","null","undefined",
             "Math","JSON","Object","Array","Number","String","Boolean"
     );
-
-    // ---------------- STATE ----------------
-
+    
     private List<String> lines = new ArrayList<>();
     private final String filePath;
-
-    // геометрия редактора
     private int editorX, editorY, editorW, editorH;
-
-    // состояние курсора / скролла
     private int scroll = 0;
     private int caretLine = 0;
     private int caretCol  = 0;
 
-    // подсказки / completion
 
     private static class Suggestion {
         final String name;
@@ -61,8 +51,6 @@ public class JsSEditorScreen extends Screen {
     private int suggestionIndex = 0;
     private int suggestionX = 0;
     private int suggestionY = 0;
-
-    // синтаксические ошибки
     private String lastErrorMessage = null;
     private int lastErrorLine = -1;
     private int lastErrorColumn = -1;
@@ -82,38 +70,30 @@ public class JsSEditorScreen extends Screen {
         recheckSyntax();
     }
 
-    // ========================================================================
-    // INIT
-    // ========================================================================
-
     @Override
     protected void init() {
-        // геометрия редактора
         editorX = 60;
         editorY = 40;
         editorW = width  - 120;
-        editorH = height - 120; // снизу остаётся место под кнопки
+        editorH = height - 120;
 
         int btnY = editorY + editorH + 10;
         int btnW = 80;
         int btnH = 20;
-
-        // SAVE
+        
         addDrawableChild(
                 ButtonWidget.builder(Text.literal("Save"), b -> {
                     JsSNetworkingClient.sendSaveScript(filePath, collectText());
                     MinecraftClient.getInstance().setScreen(null);
                 }).dimensions(editorX, btnY, btnW, btnH).build()
         );
-
-        // BACK
+        
         addDrawableChild(
                 ButtonWidget.builder(Text.literal("Back"), b ->
                         MinecraftClient.getInstance().setScreen(null)
                 ).dimensions(editorX + btnW + 20, btnY, btnW, btnH).build()
         );
-
-        // RUN
+        
         addDrawableChild(
                 ButtonWidget.builder(Text.literal("Run"), b -> {
                     JsSNetworkingClient.sendSaveScript(filePath, collectText());
@@ -305,7 +285,7 @@ public class JsSEditorScreen extends Screen {
             int bracePos = beforeCaret.lastIndexOf('{');
             if (bracePos < 0) bracePos = caretCol - 1;
 
-            String leftPart = line.substring(0, bracePos + 1); // до и включая '{'
+            String leftPart = line.substring(0, bracePos + 1);
             int totalBaseIndent = countLeadingSpaces(leftPart);
 
             String baseIndentStr = makeIndent(totalBaseIndent);
@@ -355,8 +335,7 @@ public class JsSEditorScreen extends Screen {
 
         if (chr == '"') {
             insertText("\"\"");
-
-            // ставим каретку внутрь ""
+            
             caretCol--;
             return true;
         }
@@ -550,7 +529,6 @@ public class JsSEditorScreen extends Screen {
     }
 
     private void updateSuggestionPopupPosition() {
-        // вычисляем позицию каретки
         String line = lines.get(caretLine);
         int x = editorX + 6 + textRenderer.getWidth(
                 line.substring(0, Math.min(caretCol, line.length()))
@@ -736,16 +714,13 @@ public class JsSEditorScreen extends Screen {
         if (visibleSuggestions.isEmpty()) return;
 
         int maxItemsToShow = Math.min(8, visibleSuggestions.size());
-
-        // 1) ширина по имени+сигнатуре
         int maxLabelWidth = 0;
         for (int i = 0; i < maxItemsToShow; i++) {
             Suggestion s = visibleSuggestions.get(i);
             int w = textRenderer.getWidth(s.name + "  " + s.signature);
             if (w > maxLabelWidth) maxLabelWidth = w;
         }
-
-        // 2) описание текущей подсказки
+        
         Suggestion current = visibleSuggestions.get(suggestionIndex);
         String desc = current.description == null ? "" : current.description;
 
