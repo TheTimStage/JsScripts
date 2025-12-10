@@ -23,47 +23,37 @@ public final class ScriptAPI {
     }
 
     private static void registerEvents() {
-
-        // SERVER START
         ServerLifecycleEvents.SERVER_STARTED.register(s ->
                 ScriptEngine.emit("serverStart")
         );
 
-        // SERVER TICK
         ServerTickEvents.END_SERVER_TICK.register(s -> {
 
             ScriptEngine.emit("serverTick");
-
-            // playerTick
             for (ServerPlayerEntity p : s.getPlayerManager().getPlayerList()) {
                 ScriptEngine.emit("playerTick", p);
             }
         });
 
-        // PLAYER JOIN
         ServerPlayConnectionEvents.JOIN.register((handler, sender, srv2) ->
                 ScriptEngine.emit("playerJoin", handler.player)
         );
 
-        // PLAYER LEAVE
         ServerPlayConnectionEvents.DISCONNECT.register((handler, srv2) ->
                 ScriptEngine.emit("playerLeave", handler.player)
         );
 
-        // CHAT MESSAGE
         ServerMessageEvents.CHAT_MESSAGE.register((message, sender, params) ->
                 ScriptEngine.emit("chat",
                         message.getSignedContent(),
                         sender)
         );
 
-        // BLOCK BREAK
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
             if (!world.isClient())
                 ScriptEngine.emit("blockBreak", player, pos, state);
         });
 
-        // BLOCK PLACE / INTERACT
         UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
             if (!world.isClient()) {
                 ScriptEngine.emit("blockPlace",
