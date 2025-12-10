@@ -18,7 +18,6 @@ public class JsSEditorScreen extends Screen {
     private static final int BORDER_SIZE  = 2;
     private static final int LINE_HEIGHT  = 14;
 
-    // JS ключевые слова
     private static final List<String> KEYWORDS = Arrays.asList(
             "let","var","const","if","else","for","while","switch","case","break",
             "continue","function","return","class","extends","new","try","catch",
