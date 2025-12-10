@@ -18,7 +18,6 @@ public final class JsSNetworking {
 
     private JsSNetworking() {}
 
-    // ---------- структура записи ----------
     public record ScriptEntry(String path, boolean directory) {}
 
     public static final PacketCodec<RegistryByteBuf, ScriptEntry> SCRIPT_ENTRY_CODEC =
@@ -27,10 +26,6 @@ public final class JsSNetworking {
                     PacketCodecs.BOOLEAN, ScriptEntry::directory,
                     ScriptEntry::new
             );
-
-    // =======================================================================
-    //                                 S2C
-    // =======================================================================
 
     public record OpenMenu(String directory) implements CustomPayload {
         public static final Identifier ID_RAW = Identifier.of(JsScripts.MOD_ID, "open_menu");
@@ -75,11 +70,6 @@ public final class JsSNetworking {
 
         @Override public Id<? extends CustomPayload> getId() { return ID; }
     }
-
-
-    // =======================================================================
-    //                                 C2S
-    // =======================================================================
 
     public record SaveScript(String path, String code) implements CustomPayload {
         public static final Identifier ID_RAW = Identifier.of(JsScripts.MOD_ID, "save_script");
@@ -131,10 +121,7 @@ public final class JsSNetworking {
 
         @Override public Id<? extends CustomPayload> getId() { return ID; }
     }
-
-    // =======================================================================
-    //                      Правильная отправка пакетов
-    // =======================================================================
+    
 
     private static void sendToServer(CustomPayload payload) {
         ClientPlayNetworking.send(payload);
@@ -159,26 +146,20 @@ public final class JsSNetworking {
     public static void sendRequestList(String directory) {
         sendToServer(new RequestList(directory));
     }
-
-    // =======================================================================
-    //                       Регистрация типов пакетов
-    // =======================================================================
+    
 
     public static void registerPayloadTypes() {
 
-        // ----------------- S2C -----------------
         PayloadTypeRegistry.playS2C().register(OpenMenu.ID, OpenMenu.CODEC);
         PayloadTypeRegistry.playS2C().register(OpenEditor.ID, OpenEditor.CODEC);
         PayloadTypeRegistry.playS2C().register(ScriptsList.ID, ScriptsList.CODEC);
 
-        // ----------------- C2S -----------------
         PayloadTypeRegistry.playC2S().register(SaveScript.ID, SaveScript.CODEC);
         PayloadTypeRegistry.playC2S().register(DeleteEntry.ID, DeleteEntry.CODEC);
         PayloadTypeRegistry.playC2S().register(RunScript.ID, RunScript.CODEC);
         PayloadTypeRegistry.playC2S().register(OpenEditorRequest.ID, OpenEditorRequest.CODEC);
         PayloadTypeRegistry.playC2S().register(RequestList.ID, RequestList.CODEC);
 
-        // 🔥 ЭТОТ ПАКЕТ У ТЕБЯ НЕ РАБОТАЛ, ПОТОМУ ЧТО НЕ БЫЛ РЕГИСТРИРОВАН
         PayloadTypeRegistry.playC2S().register(CreateScript.ID, CreateScript.CODEC);
     }
 
