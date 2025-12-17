@@ -1,5 +1,5 @@
-**Language / Язык:**  
-[🇷🇺 Русский](README_ru.md) | [🇬🇧 English](README)
+**Русский язык:**  
+[🇷🇺 Русский](README_ru.md)
 
 # JsScripts - API Docs
 ### JavaScript Scripting Mod for Game Events · Fabric 1.21.8
