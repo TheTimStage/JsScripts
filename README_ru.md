@@ -1,5 +1,5 @@
-**Language / Язык:**  
-[🇷🇺 Русский](README_ru.md) | [🇬🇧 English](README_en.md)
+**English language**  
+[🇬🇧 English](README.md)
 
 # JsScripts - API Docs
 ### Скриптовый мод на JavaScript для игровых ивентов · Fabric 1.21.8
