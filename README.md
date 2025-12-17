@@ -176,8 +176,3 @@ on("joinPing", (player, msg) => msg(player, msg));
 JsScripts is **still under active development** and may contain bugs or missing features.  
 Feedback, suggestions, and reports are highly appreciated.
 
----
-
-## 🎉 Thank you
-
-Thanks for using JsScripts! More features, stability improvements, and tools are coming soon.
