@@ -1,220 +1,138 @@
-**English language**  
+**English:**  
 [🇬🇧 English](README.md)
 
-# JsScripts - API Docs
-### Скриптовый мод на JavaScript для игровых ивентов · Fabric 1.21.8
+# JsScripts - Документация API
+### Мод для написания скриптов на JavaScript для игровых событий · Fabric 1.21.8-26.1
 
-JsScripts - Это очень удобный инструмент для вашего сервера с большим потенциалом, позволяющий создавать лорные ивенты, автоматизацию и просто простые скрипты.
-Код можно писать прямо в игре! В мод встроен удобный редактор JavaScript редактор.
+JsScripts — это мощный и гибкий инструмент для вашего сервера, позволяющий создавать сюжетные (lore) события, автоматизацию и простую логику скриптов с использованием JavaScript.  
+Вы можете писать код **прямо в игре**, используя встроенный редактор JavaScript.
 
 ---
 
-## 📁 Где хранятся скрипты
+## 📁 Расположение скриптов
 
-Все скрипты хранятся серверном конфиге, в папке:
+Все скрипты хранятся в директории конфигурации сервера:
 
-```
+```text
 config/jsscripts/
 ```
 
 ---
 
-# 🔰 Основы ScriptAPI
+## 🔰 Основы ScriptAPI
 
-## **log(message)**
+### log(message)
 Выводит сообщение в консоль сервера.
 
 ```js
-log("Скрипт запущен");
+log("Script started");
 ```
 
 ---
 
-## **scriptType("once" | "loop")**
-Определяет тип выполнения скрипта:
+## ⏳ Планировщик (Scheduler)
 
-| Тип | Описание |
-|-----|----------|
-| **once** | Скрипт выполняется один раз и выгружается |
-| **loop** | Скрипт работает каждый тик |
+- `setTimeout(fn, ticks)` — Выполняет функцию обратного вызова (callback) один раз через N тиков.
+- `setInterval(fn, ticks)` — Повторяет выполнение каждые N тиков.
+- `clearTimeout(id)` — Отменяет запланированную задачу таймаута.
+- `clearInterval(id)` — Отменяет запланированную задачу интервала (является псевдонимом clearTimeout).
 
 ```js
-scriptType("loop");
+setInterval(() => log("2 seconds passed"), 40);
 ```
 
 ---
 
-## scriptEnd()
+## 📣 События ScriptAPI
 
-Принудительно завершает выполнение текущего скрипта.
-После вызова скрипт полностью выгружается из ScriptEngine: удаляются все обработчики событий, цикл onLoop, а также задачи планировщика (wait, every, repeat). Никакие дальнейшие строки скрипта также не будут выполнены.
-
-Пример:
-```js
-if (player.getHealth() <= 0) {
-    log("Скрипт завершён, т.к. игрок мёртв");
-    scriptEnd();
-}
-```
----
-
-## **on(event, handler)**
-Регистрирует JS‑обработчик события.
+| Событие      | Аргументы     | Описание              |
+|--------------|---------------|-----------------------|
+| Events.onJoin | playerName    | Срабатывает, когда игрок заходит на сервер. |
 
 ```js
-on("playerJoin", p => msg(p, "Добро пожаловать!"));
+Events.onJoin(p => Server.broadcast("Welcome, " + p + "!"));
 ```
 
 ---
 
-## **onLoop(handler)**
-Выполняется каждый тик, если скрипт работает в режиме `loop`.
+## 🎮 Игрок и интерфейс (Player & HUD)
 
----
-
-# ⏳ Планировщик (Scheduler)
-
-## **wait(ticks, fn)**
-Выполнить действие через N тиков.
-
-## **delay(ticks, fn)**
-Алиас `wait`.
-
-## **repeat(count, fn(index))**
-Выполнить функцию несколько раз, 1 раз в тик.
-
-## **every(ticks, fn)**
-Повторять выполнение каждые N тиков.
+- `Player.teleport(playerName, x, y, z)` — Телепортирует игрока.
+- `Player.giveItem(playerName, itemId, count)` — Выдает предмет игроку.
+- `Player.getPos(playerName)` — Возвращает массив `[x, y, z]` с координатами игрока или `null`.
+- `Player.sendActionBar(playerName, text)` — Отображает текст над панелью быстрого доступа (actionbar).
+- `Player.sendTitle(playerName, title, subtitle, fadeIn, stay, fadeOut)` — Полная последовательность появления форматированного заголовка (title) на экране.
 
 ```js
-every(40, () => log("Прошло 2 секунды"));
+Player.giveItem("Notch", "minecraft:diamond", 64);
 ```
 
 ---
 
-# 📣 События ScriptAPI
+## 🌍 API Мира (World API)
 
-| Событие | Аргументы | Описание |
-|---------|-----------|----------|
-| **serverStart** | – | сервер полностью запущен |
-| **serverTick** | – | вызывается каждый тик |
-| **playerTick** | player | тик игрока |
-| **playerJoin** | player | вход игрока |
-| **playerLeave** | player | выход игрока |
-| **chat** | text, player | сообщение в чате |
-| **blockBreak** | player, pos, state | блок сломан |
-| **blockPlace** | player, pos, state | блок установлен / кликнут |
-
----
-
-# 🎮 Player & HUD
-
-## **msg(player, text)**
-Отправить игроку сообщение.
-
-## **sendMessage(player, text)**
-Алиас `msg`.
-
-## **actionbar(player, text)**
-Показать текст в actionbar.
-
-## **title(player, text)**
-Показать титул.
-
-## **subtitle(player, text)**
-Показать подзаголовок.
-
-## **fullTitle(player, title, subtitle, fadeIn, stay, fadeOut)**
-Полная титульная заставка.
-
-## **tp(player, x, y, z)**
-Телепортация игрока.
-
-## **give(player, itemId)**
-Выдать предмет:
+- `World.setBlock(x, y, z, blockId)` — Устанавливает блок в мире.
+- `World.strikeLightning(x, y, z)` — Вызывает удар молнии по указанным координатам.
+- `World.spawnParticle(id, x, y, z, count, dx, dy, dz, speed)` — Создает частицы.
+- `World.playSound(id, x, y, z, volume, pitch)` — Воспроизводит звук по координатам в мире.
 
 ```js
-give(player, "minecraft:diamond");
-```
-
-## **playSound(player, id, volume?, pitch?)**
-Проиграть звук только для конкретного игрока.
-
----
-
-# 🌍 World
-
-## **World.overworld()**
-Возвращает оверворлд.
-
-## **World.nether()**
-Возвращает ад.
-
-## **World.end()**
-Возвращает край.
-
----
-
-## **World.setBlock(world, x, y, z, blockId)**
-Устанавливает блок.
-
-## **World.particle(world, id, x, y, z, dx, dy, dz, speed, count)**
-Создаёт частицы.
-
-## **playSoundAt(world, x, y, z, id, volume?, pitch?)**
-Проигрывает звук в мире.
-
----
-
-# 🧠 Command
-
-## **runCommand(command)**
-Выполняет команду от имени сервера.
-
-## **runCommandAs(player, command)**
-Выполняет команду от имени игрока.
-
----
-
-# 📡 Radius
-
-## **emitRadius(event, x, y, z, radius, ...args)**
-Вызывает событие **только для тех игроков, которые находятся в радиусе**.
-
-```js
-emitRadius("alert", 100, 70, 100, 15, "Кто-то рядом!");
-```
-
-Обработчик:
-
-```js
-on("alert", (player, msg) => msg(player, msg));
+World.setBlock(0, 100, 0, "minecraft:stone");
 ```
 
 ---
 
-# 🧪 Примеры
+## 🧠 API Сервера и Команд
 
-## Периодический эффект
+- `Server.runCommand(command)` — Выполняет команду от имени сервера.
+- `Server.broadcast(message)` — Отправляет системное сообщение в чат всем игрокам на сервере.
+- `Server.getPlayers()` — Возвращает список всех объектов `ServerPlayer`, находящихся онлайн.
+- `Server.getPlayer(playerName)` — Возвращает объект конкретного игрока по его имени.
+
 ```js
-scriptType("loop");
+Server.runCommand("time set day");
+```
 
-every(100, () => {
-    let w = World.overworld();
-    World.particle(w, "minecraft:explosion", 0, 100, 0, 0, 0, 0, 1, 10);
+---
+
+## 🧪 Примеры
+
+Периодический эффект:
+
+```js
+setInterval(() => {
+    Server.runCommand("weather clear");
+    Server.broadcast("§bThe weather is clear again!");
+}, 6000);
+```
+
+Событие при входе игрока:
+
+```js
+Events.onJoin(playerName => {
+    Server.broadcast("§e" + playerName + " has joined the server!");
+    
+    setTimeout(() => {
+        Player.sendTitle(playerName, "§6JsScripts", "Welcome to the game!", 10, 70, 20);
+        
+        let pos = Player.getPos(playerName);
+        if (pos) {
+            World.playSound("minecraft:entity.player.levelup", pos[0], pos[1], pos[2], 1.0, 1.0);
+            World.spawnParticle("minecraft:happy_villager", pos[0], pos[1] + 2, pos[2], 20, 0.5, 0.5, 0.5, 0.1);
+        }
+    }, 40);
 });
 ```
 
-## Radius‑ивент при входе игрока
-```js
-on("playerJoin", p => {
-    emitRadius("joinPing", p.getX(), p.getY(), p.getZ(), 10, "Новый игрок рядом!");
-});
+---
 
-on("joinPing", (player, msg) => msg(player, msg));
-```
+## 🚧 Уведомление о бета-версии
+
+JsScripts **все еще находится в стадии активной разработки** и может содержать ошибки или недостающие функции.
 
 ---
-JsScripts всё ещё на стадии разработки, и впереди множество улучшений. (По крайней мере на это надеюсь)
 
-Жду фидбек!
+## 🎉 Спасибо
+
+Спасибо, что используете JsScripts! Скоро появятся новые функции, улучшения стабильности и дополнительные инструменты.
+
