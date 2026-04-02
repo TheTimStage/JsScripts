@@ -2,7 +2,7 @@
 [🇷🇺 Русский](README_ru.md)
 
 # JsScripts - API Docs
-### JavaScript Scripting Mod for Game Events · Fabric 1.21.8-26.1
+### JavaScript Scripting Mod for Game Events · Fabric 1.21.8-26.1.1
 
 JsScripts is a powerful and flexible tool for your server, allowing you to create lore events, automation, and simple script logic using JavaScript.  
 You can write code **directly in the game** using the built‑in JavaScript editor.
