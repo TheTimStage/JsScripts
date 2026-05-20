@@ -34,9 +34,7 @@ public class JsSCommand {
                                         return 0;
                                     }
 
-                                    // отправляем пакет открытия меню
                                     ServerPlayNetworking.send(player, new JsSNetworking.OpenMenu(""));
-
                                     return 1;
                                 }))
         );
