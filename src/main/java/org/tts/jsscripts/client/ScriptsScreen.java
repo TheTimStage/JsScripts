@@ -1,5 +1,3 @@
-// !!! Твой класс целиком, изменения только в renderList !!!
-
 package org.tts.jsscripts.client;
 
 import net.minecraft.client.MinecraftClient;
